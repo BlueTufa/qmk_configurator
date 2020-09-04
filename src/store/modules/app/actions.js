@@ -37,6 +37,22 @@ const actions = {
         }
       });
   },
+    /**
+   * load the default keymap for the currently selected keyboard
+   */
+  async loadKeymapByLayout({ state }, layout) {
+    const keyboardPath = state.keyboard.slice(0, 1);
+    // eslint-disable-next-line
+    const keyboardName = state.keyboard.replace(/\//g, '_');
+
+    return axios
+      .get(`keymaps/${keyboardPath}/${keyboardName}_${layout}.json`)
+      .then(r => {
+        if (r.status === 200) {
+          return r.data;
+        }
+      });
+  },
   /**
    * load keymap from the selected URL
    */

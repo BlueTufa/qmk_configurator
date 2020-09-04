@@ -141,6 +141,7 @@ export default {
         return this.$store.state.app.layout;
       },
       set(value) {
+        console.log("Layout value changed to: " + value)
         if (this.isDirty) {
           if (!confirm(clearKeymapTemplate({ action: 'change your layout' }))) {
             const old = this.layout;
@@ -150,7 +151,37 @@ export default {
           }
         }
         this.clear();
-        this.updateLayout({ target: { value } });
+        this.loadKeymapByLayout(value)
+        .then(data => {
+          if (data) {
+            console.log(data);
+            this.updateLayout(data.layout);
+            this.updateKeymapName('');
+            const stats = load_converted_keymap(data.layers);
+            const msg = this.$t('statsTemplate', stats);
+            // let promise = new Promise(resolve =>
+            //   // store.commit('keymap/setLoadingKeymapPromise', resolve)
+            // ).then(() => {
+            //   // clear the keymap name for the default keymap
+            //   // otherwise it overrides the default getter
+
+            //   // store.commit('status/append', msg);
+            //   // if (!isAutoInit) {
+            //   //   store.commit('keymap/setDirty');
+            //   // }
+            // });
+            // return promise;
+          }
+          return data;
+        })
+        .catch(error => {
+          // statusError(
+          //   `\n* Sorry there is no default for the ${this.keyboard} keyboard... yet!`
+          // );
+          console.log('error loadDefault', error);
+        });
+        return true;
+        // this.updateLayout({ target: { value } });
       }
     },
     fontAdjustClasses() {
@@ -216,6 +247,7 @@ export default {
       'changeKeyboard',
       'fetchKeyboards',
       'loadDefaultKeymap',
+      'loadKeymapByLayout',
       'setFavoriteKeyboard'
     ]),
     ...mapActions('keymap', ['initTemplates']),
